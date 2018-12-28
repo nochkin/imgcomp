@@ -1,0 +1,65 @@
+#! /bin/bash
+# This script setups up imgcomp to run at startup
+# It is assumed that setup-imgcomp has already been run.
+# This script assumes imgcomp is in /home/pi/imgcomp
+
+# Make sure the camera is enabled
+if [[ $EUID -ne 0 ]]; then
+	echo "Parts of this script require administrator priviledged."
+	echo "You may be propted to enter your password"
+fi
+
+if [ ! -f imgcomp ]; then
+	echo "You need to build imgcomp first.  type \"make\" to build it."
+	exit 1
+fi
+
+if grep -q "start_x\=1" /boot/config.txt; then
+	echo "    camera module is already enabled"
+else	
+	echo "camera is not enabled.  Please run raspi-config to enable camera module"
+	exit 1
+fi
+
+# Make sure a configuration file exists
+if [ -e ../imgcomp.conf ] ; then
+	echo "    imcomp.conf file aready in /home/pi"
+else
+	echo "copy imcomp.conf.example to /home/pi/imgcomp.conf"
+	cp -a imgcomp.conf.example /home/pi/imgcomp.conf
+fi
+
+if [ -d /ramdisk ]; then
+	echo "    ramdisk mount point already exists"
+else
+	echo "making /ramdisk mount point"
+	sudo mkdir /ramdisk
+fi
+
+if grep -q "/ramdisk" /etc/fstab; then
+	echo "    fstab already contains entry for ramdisk"
+else
+	echo "Adding ramdisk entry to fstab"
+	echo "tmpfs   /ramdisk        tmpfs   nodev,nosuid,size=20M   0       0" | sudo tee -a  /etc/fstab > /dev/null
+	sudo mount /ramdisk
+fi
+
+if grep -q "logo.nologo" /boot/cmdline.txt; then
+	echo "    on screen pi logo already disabled in /boot/cmdline.txt"
+else
+	echo "disabling on screen pi logo in cmdline.txt"
+	sudo sed -i '${s/$/ logo.nologo/}' /boot/cmdline.txt
+fi
+
+# Commented out camera LED blinking stuff because 
+# because I can't figure out how to blink the camera LED in Pi2.
+
+#if ls -l blink_camera_led | grep -q "sr.x...root" ; then
+#	echo "    blink_led already set to setuid root"
+#else
+#	echo "Setting blink_led to be root and setuid"
+#	sudo chown root blink_camera_led
+#	sudo chmod +s blink_camera_led
+#fi
+
+

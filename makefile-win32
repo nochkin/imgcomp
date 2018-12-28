@@ -1,0 +1,25 @@
+#--------------------------------
+# jhead makefile for Win32
+#--------------------------------
+
+# Pull in standard variable definitions
+
+CC=cl /nologo
+CFLAGS=-c -Ox -Os -W3 -D _CRT_SECURE_NO_WARNINGS
+
+LINKER=link
+LINKCON = /nologo /NODEFAULTLIB:LIBCMTD
+
+all:imgcomp.exe
+
+OBJ = obj
+
+OBJECTS_IMGCOMP = $(OBJ)\main.obj $(OBJ)\compare.obj $(OBJ)\dir_win.obj \
+                  $(OBJ)\jpeg2mem.obj $(OBJ)\jpgfile.obj $(OBJ)\exif.obj \
+                  $(OBJ)\start_raspistill.obj $(OBJ)\util.obj
+
+$(OBJECTS_IMGCOMP): src\$(@B).c src\imgcomp.h
+    $(CC) /Fo$(OBJ)\ $(CFLAGS) src\$(@B).c
+
+imgcomp.exe: $(OBJECTS_IMGCOMP)
+    $(LINKER) $(LINKCON) -OUT:imgcomp.exe libjpeg\libjpeg.lib $(OBJECTS_IMGCOMP)

@@ -163,7 +163,7 @@ int manage_raspistill(int NewImages)
             InitialAverageBright = (InitialBrSum+2) / 5;
             if (InitialAverageBright == 0) InitialAverageBright = 1; // Avoid division by zero.
             RunningAverageBright = InitialAverageBright;
-            printf("Initial rightness average = %d\n",InitialAverageBright);
+            printf("Initial brightness average = %d\n",InitialAverageBright);
         }
     }
 
